@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% load currency_tags %}
+
+{% block title %}Order Confirmed #{{ order.order_number }} - ShopKart India{% endblock %}
+
+{% block content %}
+
+<div class="order-confirmation-box">
+  
+  <div class="order-placed-icon">
+    <svg width="36" height="36" fill="none" stroke="currentColor" stroke-width="2.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+  </div>
+
+  <h1 style="font-size: 1.75rem; font-weight: 800; color: var(--text-dark); margin-bottom: 0.35rem;">
+    Order Placed Successfully!
+  </h1>
+  <p style="color: var(--text-muted); font-size: 0.925rem; margin-bottom: 1.75rem;">
+    Thank you for shopping with ShopKart India! Your order <strong>#{{ order.order_number }}</strong> has been confirmed.
+  </p>
+
+  <!-- Receipt Box -->
+  <div style="background: #fafafa; border: 1px solid #e0e0e0; border-radius: 4px; padding: 1.5rem; text-align: left; margin-bottom: 1.75rem;">
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e0e0e0; padding-bottom: 1rem; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+      <div>
+        <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Order ID</div>
+        <div style="font-size: 1.1rem; font-weight: 800; color: var(--primary-blue);">{{ order.order_number }}</div>
+      </div>
+      <div>
+        <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Estimated Delivery</div>
+        <div style="font-size: 0.95rem; font-weight: 700; color: var(--success-green);">
+          {{ order.estimated_delivery_date|date:"D, d M Y" }}
+        </div>
+      </div>
+      <div>
+        <span class="status-badge status-{{ order.status|lower }}">{{ order.status }}</span>
+      </div>
+    </div>
+
+    <!-- Delivery Destination -->
+    <div style="margin-bottom: 1.25rem; border-bottom: 1px solid #f0f0f0; padding-bottom: 1rem;">
+      <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.4rem;">
+        Delivery Address &amp; Contact:
+      </div>
+      <div style="font-size: 0.9rem; color: var(--text-dark); line-height: 1.5;">
+        <strong>{{ order.full_name }}</strong> &bull; Mobile: <strong>+91 {{ order.mobile }}</strong><br>
+        {{ order.address }}, {{ order.city }}, {{ order.state }} - <strong>{{ order.pin_code }}</strong><br>
+        Payment Mode: <strong>{{ order.payment_method }}</strong>
+      </div>
+    </div>
+
+    <!-- Items List -->
+    <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.6rem;">
+      Ordered Items ({{ order.item_count }}):
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 0.6rem; margin-bottom: 1.25rem;">
+      {% for item in order.items.all %}
+        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem;">
+          <div style="display: flex; align-items: center; gap: 0.6rem;">
+            {% if item.product %}
+              <img src="{{ item.product.image_url }}" alt="{{ item.product_name }}" style="width: 36px; height: 36px; object-fit: cover; border-radius: 3px; border: 1px solid #e0e0e0;" onerror="this.onerror=null; this.src='/static/images/placeholder.svg';">
+            {% endif %}
+            <span>{{ item.quantity }}x <strong>{{ item.product_name }}</strong></span>
+          </div>
+          <span style="font-weight: 700; color: var(--text-dark);">{{ item.subtotal|rupee }}</span>
+        </div>
+      {% endfor %}
+    </div>
+
+    <!-- Totals Line -->
+    <div style="border-top: 1px dashed #e0e0e0; padding-top: 0.85rem; display: flex; justify-content: space-between; align-items: center; font-size: 1.15rem; font-weight: 800;">
+      <span>Total Paid</span>
+      <span style="color: var(--text-dark); font-family: var(--font-heading);">{{ order.total_amount|rupee }}</span>
+    </div>
+
+  </div>
+
+  <div style="display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap;">
+    <a href="{% url 'my_orders' %}" class="btn btn-outline btn-lg" id="view-orders-btn">View My Orders</a>
+    <a href="{% url 'product_list' %}" class="btn btn-primary btn-lg" id="continue-btn">Continue Shopping</a>
+  </div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - ShopKart India Seller Hub{% endblock %}
+
+{% block content %}
+
+<div style="max-width: 680px; margin: 1.5rem auto;">
+  
+  <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+    <a href="{% url 'admin_dashboard' %}" style="color: var(--text-muted);">&larr; Back to Seller Hub</a>
+  </div>
+
+  <div style="background: #fff; border-radius: 4px; box-shadow: var(--shadow-card); padding: 1.75rem; border: 1px solid #e0e0e0;">
+    <h1 style="font-size: 1.4rem; font-weight: 800; margin-bottom: 0.35rem;">{{ title }}</h1>
+    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem;">
+      Fill out the product information below. Prices must be in Indian Rupees (₹).
+    </p>
+
+    <form method="POST">
+      {% csrf_token %}
+
+      <div class="form-group-item">
+        <label for="{{ form.name.id_for_label }}" class="form-field-label">Product Name *</label>
+        {{ form.name }}
+        {% if form.name.errors %}
+          <div class="form-error-msg">{{ form.name.errors.0 }}</div>
+        {% endif %}
+      </div>
+
+      <div class="form-grid-2">
+        <div class="form-group-item">
+          <label for="{{ form.category.id_for_label }}" class="form-field-label">Category *</label>
+          {{ form.category }}
+          {% if form.category.errors %}
+            <div class="form-error-msg">{{ form.category.errors.0 }}</div>
+          {% endif %}
+        </div>
+
+        <div class="form-group-item">
+          <label for="{{ form.rating.id_for_label }}" class="form-field-label">Rating (1.0 to 5.0) *</label>
+          {{ form.rating }}
+          {% if form.rating.errors %}
+            <div class="form-error-msg">{{ form.rating.errors.0 }}</div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="form-grid-2">
+        <div class="form-group-item">
+          <label for="{{ form.mrp.id_for_label }}" class="form-field-label">MRP (₹) *</label>
+          {{ form.mrp }}
+          {% if form.mrp.errors %}
+            <div class="form-error-msg">{{ form.mrp.errors.0 }}</div>
+          {% endif %}
+        </div>
+
+        <div class="form-group-item">
+          <label for="{{ form.selling_price.id_for_label }}" class="form-field-label">Selling Price (₹) *</label>
+          {{ form.selling_price }}
+          {% if form.selling_price.errors %}
+            <div class="form-error-msg">{{ form.selling_price.errors.0 }}</div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="form-grid-2">
+        <div class="form-group-item">
+          <label for="{{ form.stock.id_for_label }}" class="form-field-label">Available Stock Quantity *</label>
+          {{ form.stock }}
+          {% if form.stock.errors %}
+            <div class="form-error-msg">{{ form.stock.errors.0 }}</div>
+          {% endif %}
+        </div>
+
+        <div class="form-group-item">
+          <label for="{{ form.image.id_for_label }}" class="form-field-label">Image URL or Static Path</label>
+          {{ form.image }}
+          {% if form.image.errors %}
+            <div class="form-error-msg">{{ form.image.errors.0 }}</div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="form-group-item">
+        <label for="{{ form.description.id_for_label }}" class="form-field-label">Full Product Description *</label>
+        {{ form.description }}
+        {% if form.description.errors %}
+          <div class="form-error-msg">{{ form.description.errors.0 }}</div>
+        {% endif %}
+      </div>
+
+      <div style="display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1.5rem;">
+        <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary">Cancel</a>
+        <button type="submit" class="btn btn-buy-now" id="save-product-btn">
+          {% if is_new %}Save Product{% else %}Update Product{% endif %}
+        </button>
+      </div>
+
+    </form>
+  </div>
+
+</div>
+
+{% endblock %}

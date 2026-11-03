@@ -1,0 +1,225 @@
+{% extends 'base.html' %}
+{% load currency_tags %}
+
+{% block title %}Shopping Cart ({{ cart|length }}) - ShopKart India{% endblock %}
+
+{% block content %}
+
+<div style="margin-bottom: 1.25rem;">
+  <h1 style="font-size: 1.5rem; font-weight: 700;">My Shopping Cart ({{ cart|length }} Item{{ cart|length|pluralize }})</h1>
+</div>
+
+{% if cart|length > 0 %}
+  <div class="cart-page-layout">
+    
+    <!-- Left Column: Cart Items List -->
+    <div class="cart-left-panel">
+      
+      <!-- Free Delivery Progress Banner -->
+      <div style="padding: 0.85rem 1.25rem; background: {% if cart.subtotal >= 999 %}var(--success-light){% else %}#fff8e1{% endif %}; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; justify-content: space-between; font-size: 0.85rem;">
+        {% if cart.subtotal >= 999 %}
+          <span style="color: var(--success-green); font-weight: 700;">
+            &#10003; Yay! You unlocked <strong>FREE Delivery</strong> on this order!
+          </span>
+        {% else %}
+          <span style="color: #b78103; font-weight: 600;">
+            Add <strong>{{ cart.cart_obj.amount_for_free_delivery|rupee }}</strong> more to enjoy <strong>FREE Delivery</strong>!
+          </span>
+        {% endif %}
+
+        <form action="{% url 'cart_clear' %}" method="POST" onsubmit="return confirm('Are you sure you want to clear your cart?');" style="margin: 0;">
+          {% csrf_token %}
+          <button type="submit" style="background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 0.8rem; font-weight: 600;">
+            Clear Cart
+          </button>
+        </form>
+      </div>
+
+      <!-- Items List -->
+      {% for item in cart %}
+        <div class="cart-item-card" id="cart-item-row-{{ item.product.id }}">
+          
+          <!-- Image -->
+          <div>
+            <a href="{{ item.product.get_absolute_url }}">
+              <img src="{{ item.image }}" alt="{{ item.name }}" class="cart-item-thumb" onerror="this.onerror=null; this.src='/static/images/placeholder.svg';">
+            </a>
+          </div>
+
+          <!-- Product Details -->
+          <div>
+            <h3 class="cart-item-title">
+              <a href="{{ item.product.get_absolute_url }}">{{ item.name }}</a>
+            </h3>
+            <div style="font-size: 0.775rem; color: var(--text-muted); margin-bottom: 0.35rem;">
+              Category: {{ item.category }} &bull; Seller: ShopKart Retail
+            </div>
+
+            <div class="price-row" style="margin-bottom: 0.5rem;">
+              <span class="selling-price" style="font-size: 1.15rem;">{{ item.price|rupee }}</span>
+              <span class="mrp-price">{{ item.mrp|rupee }}</span>
+              {% if item.discount_percent > 0 %}
+                <span class="discount-tag">{{ item.discount_percent }}% off</span>
+              {% endif %}
+            </div>
+
+            <!-- Delivery Estimate -->
+            <div class="delivery-estimate-badge">
+              Delivery in <strong>3 - 4 business days</strong> | 
+              {% if cart.subtotal >= 999 %}
+                <span style="color: var(--success-green); font-weight: 700;">Free</span>
+              {% else %}
+                <span style="color: var(--text-dark); font-weight: 600;">&#8377;49</span>
+              {% endif %}
+            </div>
+
+            <!-- Quantity & Remove Action Controls -->
+            <div class="cart-item-controls">
+              
+              <div class="quantity-stepper">
+                <!-- Decrease -->
+                <form action="{% url 'cart_decrease' item.product.id %}" method="POST" style="margin: 0;">
+                  {% csrf_token %}
+                  <button type="submit" class="stepper-btn" aria-label="Decrease quantity" id="dec-qty-{{ item.product.id }}">-</button>
+                </form>
+
+                <span class="stepper-input" style="display: flex; align-items: center; justify-content: center;">
+                  {{ item.quantity }}
+                </span>
+
+                <!-- Increase -->
+                <form action="{% url 'cart_add' item.product.id %}" method="POST" style="margin: 0;">
+                  {% csrf_token %}
+                  <input type="hidden" name="quantity" value="1">
+                  <button 
+                    type="submit" 
+                    class="stepper-btn" 
+                    aria-label="Increase quantity" 
+                    id="inc-qty-{{ item.product.id }}"
+                    {% if item.quantity >= item.stock %}disabled title="Maximum stock reached"{% endif %}
+                  >+</button>
+                </form>
+              </div>
+
+              <!-- Remove Item Button -->
+              <form action="{% url 'cart_remove' item.product.id %}" method="POST" style="margin: 0;">
+                {% csrf_token %}
+                <button type="submit" class="btn-remove-item" id="remove-btn-{{ item.product.id }}">
+                  REMOVE
+                </button>
+              </form>
+
+            </div>
+
+          </div>
+
+          <!-- Item Subtotal -->
+          <div style="text-align: right;">
+            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Subtotal</div>
+            <div style="font-family: var(--font-heading); font-size: 1.15rem; font-weight: 800; color: var(--text-dark);">
+              {{ item.subtotal|rupee }}
+            </div>
+          </div>
+
+        </div>
+      {% endfor %}
+
+      <div style="padding: 1rem 1.5rem; background: #fafafa; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f0f0f0;">
+        <a href="{% url 'product_list' %}" style="font-size: 0.85rem; font-weight: 700; color: var(--primary-blue);">
+          &larr; CONTINUE SHOPPING
+        </a>
+      </div>
+
+    </div>
+
+    <!-- Right Column: Price Details Sidebar (Flipkart Style) -->
+    <div class="price-details-card">
+      <div class="price-details-header">
+        PRICE DETAILS ({{ cart|length }} Item{{ cart|length|pluralize }})
+      </div>
+
+      <div class="price-details-body">
+        
+        <div class="price-line-item">
+          <span>Price ({{ cart|length }} items)</span>
+          <span>{{ cart.subtotal|rupee }}</span>
+        </div>
+
+        <div class="price-line-item">
+          <span>Discount Savings</span>
+          <span style="color: var(--success-green); font-weight: 600;">- {{ cart.total_savings|rupee }}</span>
+        </div>
+
+        <div class="price-line-item">
+          <span>Delivery Charges</span>
+          {% if cart.delivery_charge == 0 %}
+            <span class="free-delivery-text">FREE</span>
+          {% else %}
+            <span>{{ cart.delivery_charge|rupee }}</span>
+          {% endif %}
+        </div>
+
+        <div class="price-line-item">
+          <span>GST (18% Included)</span>
+          <span style="color: var(--text-sub);">{{ cart.gst_amount|rupee }}</span>
+        </div>
+
+        <!-- Total Payable -->
+        <div class="price-line-item total-line">
+          <span>Total Payable</span>
+          <span style="color: var(--text-dark); font-family: var(--font-heading);">
+            {{ cart.total_amount|rupee }}
+          </span>
+        </div>
+
+        <!-- Savings Box -->
+        {% if cart.total_savings > 0 %}
+          <div class="savings-banner">
+            You will save {{ cart.total_savings|rupee }} on this order!
+          </div>
+        {% endif %}
+
+        <!-- Place Order CTA Button -->
+        <div style="margin-top: 1.25rem;">
+          {% if user.is_authenticated %}
+            <a href="{% url 'checkout' %}" class="btn btn-buy-now btn-block btn-lg" id="proceed-checkout-btn" style="font-size: 1rem; letter-spacing: 0.03em;">
+              PROCEED TO CHECKOUT &rarr;
+            </a>
+          {% else %}
+            <a href="{% url 'login' %}?next={% url 'checkout' %}" class="btn btn-buy-now btn-block btn-lg" id="login-checkout-btn" style="font-size: 1rem;">
+              LOGIN TO PLACE ORDER &rarr;
+            </a>
+            <div style="text-align: center; font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;">
+              New customer? <a href="{% url 'register' %}?next={% url 'checkout' %}" style="font-weight: 700;">Register here</a>
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- Security Guarantee -->
+        <div style="margin-top: 1.25rem; font-size: 0.775rem; color: var(--text-muted); display: flex; align-items: center; gap: 0.5rem; justify-content: center;">
+          <svg width="15" height="15" fill="none" stroke="#388e3c" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+          Safe and Secure Payments. 100% Authentic Products.
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+{% else %}
+  <!-- Empty Cart State -->
+  <div style="background: #fff; padding: 4rem 1.5rem; text-align: center; border-radius: 4px; box-shadow: var(--shadow-card); max-width: 600px; margin: 2rem auto;">
+    <div style="width: 80px; height: 80px; border-radius: 50%; background: #f0f5ff; color: var(--primary-blue); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem auto;">
+      <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+    </div>
+    <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem;">Your Cart is Empty!</h2>
+    <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1.75rem;">
+      Explore our wide range of top Indian products, daily essentials, and exclusive deals.
+    </p>
+    <a href="{% url 'product_list' %}" class="btn btn-buy-now btn-lg" id="cart-shop-now-btn">
+      SHOP NOW
+    </a>
+  </div>
+{% endif %}
+
+{% endblock %}

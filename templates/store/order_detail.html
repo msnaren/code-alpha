@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% load currency_tags %}
+
+{% block title %}Order #{{ order.order_number }} Details - ShopKart India{% endblock %}
+
+{% block content %}
+
+<div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.4rem;">
+  <a href="{% url 'product_list' %}" style="color: var(--text-muted);">Home</a>
+  <span>&rsaquo;</span>
+  <a href="{% url 'my_orders' %}" style="color: var(--text-muted);">My Orders</a>
+  <span>&rsaquo;</span>
+  <span style="color: var(--text-dark); font-weight: 600;">{{ order.order_number }}</span>
+</div>
+
+<div class="cart-page-layout">
+  
+  <!-- Left Column: Order Items -->
+  <div class="cart-left-panel">
+    <div class="cart-panel-header">
+      <div>
+        <h2 style="font-size: 1.15rem; font-weight: 700;">Order #{{ order.order_number }}</h2>
+        <span style="font-size: 0.8rem; color: var(--text-muted);">Placed on {{ order.created_at|date:"d M Y, h:i A" }}</span>
+      </div>
+      <div>
+        <span class="status-badge status-{{ order.status|lower }}">{{ order.status }}</span>
+      </div>
+    </div>
+
+    <!-- Items List -->
+    {% for item in order.items.all %}
+      <div class="cart-item-card">
+        {% if item.product %}
+          <img src="{{ item.product.image_url }}" alt="{{ item.product_name }}" class="cart-item-thumb" onerror="this.onerror=null; this.src='/static/images/placeholder.svg';">
+        {% else %}
+          <img src="/static/images/placeholder.svg" alt="{{ item.product_name }}" class="cart-item-thumb">
+        {% endif %}
+
+        <div>
+          <h3 class="cart-item-title">
+            {% if item.product %}
+              <a href="{{ item.product.get_absolute_url }}">{{ item.product_name }}</a>
+            {% else %}
+              {{ item.product_name }}
+            {% endif %}
+          </h3>
+          <div style="font-size: 0.8rem; color: var(--text-muted);">
+            Price at purchase: <strong>{{ item.price_at_purchase|rupee }}</strong> &bull; Quantity: <strong>{{ item.quantity }}</strong>
+          </div>
+        </div>
+
+        <div style="text-align: right;">
+          <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Subtotal</div>
+          <div style="font-family: var(--font-heading); font-size: 1.1rem; font-weight: 800; color: var(--text-dark);">
+            {{ item.subtotal|rupee }}
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+
+    <div style="padding: 1rem 1.5rem; background: #fafafa; border-top: 1px solid #f0f0f0;">
+      <a href="{% url 'my_orders' %}" style="font-size: 0.85rem; font-weight: 700; color: var(--primary-blue);">
+        &larr; BACK TO ALL ORDERS
+      </a>
+    </div>
+  </div>
+
+  <!-- Right Column: Shipping & Payment Summary -->
+  <div>
+    
+    <!-- Shipping Address Card -->
+    <div style="background: #fff; padding: 1.25rem; border-radius: 4px; box-shadow: var(--shadow-card); margin-bottom: 1rem;">
+      <h3 style="font-size: 0.95rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.75rem; border-bottom: 1px solid #f0f0f0; padding-bottom: 0.5rem;">
+        Delivery Address
+      </h3>
+      <div style="font-size: 0.9rem; color: var(--text-dark); line-height: 1.5;">
+        <strong>{{ order.full_name }}</strong><br>
+        {{ order.address }}<br>
+        {{ order.city }}, {{ order.state }} - <strong>{{ order.pin_code }}</strong><br>
+        Phone: <strong>+91 {{ order.mobile }}</strong>
+      </div>
+    </div>
+
+    <!-- Payment Summary -->
+    <div class="price-details-card" style="position: static;">
+      <div class="price-details-header">Payment Summary</div>
+      <div class="price-details-body">
+        <div class="price-line-item">
+          <span>Items Subtotal</span>
+          <span>{{ order.subtotal|rupee }}</span>
+        </div>
+        <div class="price-line-item">
+          <span>Delivery Charges</span>
+          <span>{{ order.delivery_charge|rupee }}</span>
+        </div>
+        <div class="price-line-item">
+          <span>GST (18% Included)</span>
+          <span>{{ order.gst_amount|rupee }}</span>
+        </div>
+        <div class="price-line-item total-line">
+          <span>Total Paid</span>
+          <span style="font-family: var(--font-heading);">{{ order.total_amount|rupee }}</span>
+        </div>
+        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.75rem;">
+          Payment Method: <strong>{{ order.payment_method }}</strong>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,191 @@
+{% extends 'base.html' %}
+{% load currency_tags %}
+
+{% block title %}Seller Hub &amp; Admin Dashboard - ShopKart India{% endblock %}
+
+{% block content %}
+
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+  <div>
+    <h1 style="font-size: 1.6rem; font-weight: 800;">ShopKart India &bull; Seller Hub</h1>
+    <p style="color: var(--text-muted); font-size: 0.85rem;">Store analytics, revenue in INR (&#8377;), inventory monitoring, and product catalog controls.</p>
+  </div>
+
+  <div style="display: flex; gap: 0.6rem; flex-wrap: wrap;">
+    <a href="{% url 'admin_product_create' %}" class="btn btn-buy-now" id="admin-add-product-btn">
+      + Add New Product
+    </a>
+    <a href="/admin/" target="_blank" class="btn btn-outline" id="admin-open-django-admin-btn">
+      Django Admin &rarr;
+    </a>
+  </div>
+</div>
+
+<!-- KPI Metric Cards Grid -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+  
+  <div style="background: #fff; padding: 1.25rem; border-radius: 4px; box-shadow: var(--shadow-card); border-left: 4px solid var(--primary-blue);">
+    <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Total Products</div>
+    <div style="font-size: 1.75rem; font-weight: 800; color: var(--text-dark); margin-top: 0.25rem;">{{ total_products }}</div>
+    <div style="font-size: 0.75rem; color: var(--primary-blue); font-weight: 600; margin-top: 0.25rem;">Live in Catalog</div>
+  </div>
+
+  <div style="background: #fff; padding: 1.25rem; border-radius: 4px; box-shadow: var(--shadow-card); border-left: 4px solid var(--accent-orange);">
+    <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Total Orders</div>
+    <div style="font-size: 1.75rem; font-weight: 800; color: var(--text-dark); margin-top: 0.25rem;">{{ total_orders }}</div>
+    <div style="font-size: 0.75rem; color: var(--accent-orange); font-weight: 600; margin-top: 0.25rem;">Placed across India</div>
+  </div>
+
+  <div style="background: #fff; padding: 1.25rem; border-radius: 4px; box-shadow: var(--shadow-card); border-left: 4px solid var(--success-green);">
+    <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Gross Revenue</div>
+    <div style="font-size: 1.75rem; font-weight: 800; color: var(--success-green); margin-top: 0.25rem; font-family: var(--font-heading);">
+      {{ total_revenue|rupee }}
+    </div>
+    <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">Excluding cancelled orders</div>
+  </div>
+
+  <div style="background: #fff; padding: 1.25rem; border-radius: 4px; box-shadow: var(--shadow-card); border-left: 4px solid var(--warning-amber);">
+    <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Registered Users</div>
+    <div style="font-size: 1.75rem; font-weight: 800; color: var(--text-dark); margin-top: 0.25rem;">{{ total_users }}</div>
+    <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">Verified customer profiles</div>
+  </div>
+
+</div>
+
+<!-- Low Stock Warnings -->
+{% if low_stock_products %}
+  <div style="background: #fff8e1; border: 1px solid #ffe082; border-radius: 4px; padding: 1rem 1.25rem; margin-bottom: 2rem;">
+    <div style="font-weight: 700; color: #b78103; font-size: 0.9rem; margin-bottom: 0.4rem; display: flex; align-items: center; gap: 0.5rem;">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+      Inventory Alert: Low or Out-of-Stock Items
+    </div>
+    <div style="font-size: 0.8rem; color: #78350f; margin-bottom: 0.5rem;">The following products have 5 or fewer items remaining in stock:</div>
+    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+      {% for item in low_stock_products %}
+        <span style="background: #fff; border: 1px solid #ffe082; padding: 3px 8px; border-radius: 3px; font-size: 0.8rem; font-weight: 600; color: #b78103;">
+          {{ item.name }}: <strong>{% if item.stock == 0 %}OUT OF STOCK{% else %}{{ item.stock }} left{% endif %}</strong>
+        </span>
+      {% endfor %}
+    </div>
+  </div>
+{% endif %}
+
+<!-- Product Catalog Management Table -->
+<div style="background: #fff; border-radius: 4px; box-shadow: var(--shadow-card); margin-bottom: 2rem; overflow: hidden;">
+  <div style="padding: 1rem 1.25rem; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center;">
+    <h2 style="font-size: 1.15rem; font-weight: 700;">Catalog Inventory Management</h2>
+    <span style="font-size: 0.8rem; color: var(--text-muted);">{{ all_products.count }} Products</span>
+  </div>
+
+  <div style="overflow-x: auto;">
+    <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.85rem;">
+      <thead>
+        <tr style="background: #fafafa; border-bottom: 1px solid #e0e0e0; color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem;">
+          <th style="padding: 0.75rem 1rem;">Image</th>
+          <th style="padding: 0.75rem 1rem;">Name</th>
+          <th style="padding: 0.75rem 1rem;">Category</th>
+          <th style="padding: 0.75rem 1rem;">Selling Price</th>
+          <th style="padding: 0.75rem 1rem;">MRP</th>
+          <th style="padding: 0.75rem 1rem;">Stock</th>
+          <th style="padding: 0.75rem 1rem;">Rating</th>
+          <th style="padding: 0.75rem 1rem; text-align: right;">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for prod in all_products %}
+          <tr style="border-bottom: 1px solid #f0f0f0;">
+            <td style="padding: 0.65rem 1rem;">
+              <img src="{{ prod.image_url }}" alt="{{ prod.name }}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 3px; border: 1px solid #e0e0e0;" onerror="this.onerror=null; this.src='/static/images/placeholder.svg';">
+            </td>
+            <td style="padding: 0.65rem 1rem;">
+              <strong><a href="{{ prod.get_absolute_url }}">{{ prod.name }}</a></strong>
+            </td>
+            <td style="padding: 0.65rem 1rem;">{{ prod.category.name }}</td>
+            <td style="padding: 0.65rem 1rem; font-weight: 700; color: var(--text-dark);">{{ prod.selling_price|rupee }}</td>
+            <td style="padding: 0.65rem 1rem; color: var(--text-muted); text-decoration: line-through;">{{ prod.mrp|rupee }}</td>
+            <td style="padding: 0.65rem 1rem;">
+              {% if prod.stock <= 0 %}
+                <span class="card-badge-stock badge-out-of-stock" style="position: static;">0 units</span>
+              {% elif prod.stock <= 5 %}
+                <span class="card-badge-stock badge-low-stock" style="position: static;">{{ prod.stock }} left</span>
+              {% else %}
+                <span class="card-badge-stock badge-in-stock" style="position: static;">{{ prod.stock }} units</span>
+              {% endif %}
+            </td>
+            <td style="padding: 0.65rem 1rem;">
+              <span class="rating-pill">{{ prod.rating }} &#9733;</span>
+            </td>
+            <td style="padding: 0.65rem 1rem; text-align: right;">
+              <div style="display: inline-flex; gap: 0.4rem;">
+                <a href="{% url 'admin_product_edit' prod.id %}" class="btn btn-secondary btn-sm" id="edit-prod-{{ prod.id }}">
+                  Edit
+                </a>
+                <form action="{% url 'admin_product_delete' prod.id %}" method="POST" style="margin: 0;" onsubmit="return confirm('Are you sure you want to delete this product?');">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-danger btn-sm" id="del-prod-{{ prod.id }}">
+                    Delete
+                  </button>
+                </form>
+              </div>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Recent Orders Table -->
+<div style="background: #fff; border-radius: 4px; box-shadow: var(--shadow-card); overflow: hidden;">
+  <div style="padding: 1rem 1.25rem; border-bottom: 1px solid #f0f0f0;">
+    <h2 style="font-size: 1.15rem; font-weight: 700;">Recent Customer Orders</h2>
+  </div>
+
+  <div style="overflow-x: auto;">
+    <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.85rem;">
+      <thead>
+        <tr style="background: #fafafa; border-bottom: 1px solid #e0e0e0; color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem;">
+          <th style="padding: 0.75rem 1rem;">Order ID</th>
+          <th style="padding: 0.75rem 1rem;">Customer</th>
+          <th style="padding: 0.75rem 1rem;">Location</th>
+          <th style="padding: 0.75rem 1rem;">Placed On</th>
+          <th style="padding: 0.75rem 1rem;">Total Amount</th>
+          <th style="padding: 0.75rem 1rem;">Status</th>
+          <th style="padding: 0.75rem 1rem; text-align: right;">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if recent_orders %}
+          {% for ord in recent_orders %}
+            <tr style="border-bottom: 1px solid #f0f0f0;">
+              <td style="padding: 0.65rem 1rem; font-weight: 700; color: var(--primary-blue);">{{ ord.order_number }}</td>
+              <td style="padding: 0.65rem 1rem;">
+                <strong>{{ ord.full_name }}</strong><br>
+                <small style="color: var(--text-muted);">+91 {{ ord.mobile }}</small>
+              </td>
+              <td style="padding: 0.65rem 1rem;">{{ ord.city }}, {{ ord.state }}</td>
+              <td style="padding: 0.65rem 1rem;">{{ ord.created_at|date:"d M Y" }}</td>
+              <td style="padding: 0.65rem 1rem; font-weight: 700; font-family: var(--font-heading);">{{ ord.total_amount|rupee }}</td>
+              <td style="padding: 0.65rem 1rem;">
+                <span class="status-badge status-{{ ord.status|lower }}">{{ ord.status }}</span>
+              </td>
+              <td style="padding: 0.65rem 1rem; text-align: right;">
+                <a href="{% url 'order_detail' ord.id %}" class="btn btn-secondary btn-sm">
+                  View
+                </a>
+              </td>
+            </tr>
+          {% endfor %}
+        {% else %}
+          <tr>
+            <td colspan="7" style="padding: 2rem; text-align: center; color: var(--text-muted);">
+              No customer orders received yet.
+            </td>
+          </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block title %}Login - ShopKart India{% endblock %}
+
+{% block content %}
+
+<div style="max-width: 440px; margin: 2rem auto; background: #fff; border-radius: 4px; box-shadow: var(--shadow-card); overflow: hidden; border: 1px solid #e0e0e0;">
+  
+  <div style="background: var(--primary-blue); color: #fff; padding: 2rem 2rem 1.75rem 2rem;">
+    <h2 style="font-size: 1.6rem; font-weight: 800; color: #fff; margin-bottom: 0.35rem;">Login</h2>
+    <p style="font-size: 0.9rem; color: #d6e4ff; line-height: 1.4;">
+      Get access to your Orders, Wishlist and Exclusive Indian Deals.
+    </p>
+  </div>
+
+  <div style="padding: 2rem;">
+    <form method="POST" action="{% url 'login' %}">
+      {% csrf_token %}
+      {% if next %}
+        <input type="hidden" name="next" value="{{ next }}">
+      {% endif %}
+
+      <div class="form-group-item">
+        <label for="{{ form.identifier.id_for_label }}" class="form-field-label">Email, Username, or 10-Digit Mobile</label>
+        {{ form.identifier }}
+        {% if form.identifier.errors %}
+          <div class="form-error-msg">{{ form.identifier.errors.0 }}</div>
+        {% endif %}
+      </div>
+
+      <div class="form-group-item">
+        <label for="{{ form.password.id_for_label }}" class="form-field-label">Password</label>
+        {{ form.password }}
+        {% if form.password.errors %}
+          <div class="form-error-msg">{{ form.password.errors.0 }}</div>
+        {% endif %}
+      </div>
+
+      <button type="submit" class="btn btn-buy-now btn-block btn-lg" style="margin-top: 1rem; font-size: 0.95rem;" id="login-submit-btn">
+        LOGIN
+      </button>
+    </form>
+
+    <!-- Sample Credentials Box -->
+    <div style="background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 4px; padding: 0.85rem; margin-top: 1.5rem; font-size: 0.8rem; color: #475569; line-height: 1.5;">
+      <strong>Demo Credentials for Evaluation:</strong><br>
+      &bull; <strong>Superuser Admin:</strong> <code>admin</code> / <code>Admin@123</code><br>
+      &bull; <strong>Demo Customer:</strong> <code>rahul</code> / <code>Password@123</code> (or email: <code>rahul.sharma@example.com</code>)
+    </div>
+
+    <div style="text-align: center; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #f0f0f0; font-size: 0.85rem; color: var(--text-muted);">
+      New to ShopKart? <a href="{% url 'register' %}{% if next %}?next={{ next|urlencode }}{% endif %}" style="font-weight: 700; color: var(--primary-blue);">Create an account</a>
+    </div>
+
+  </div>
+
+</div>
+
+{% endblock %}

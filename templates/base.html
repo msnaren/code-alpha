@@ -1,0 +1,226 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="{% block meta_description %}ShopKart India - Online Shopping for Electronics, Fashion, Home, Beauty, Books & Grocery. Best deals with fast delivery across India.{% endblock %}">
+  <title>{% block title %}ShopKart India - India's Favorite Online Shopping Destination{% endblock %}</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+
+  <!-- ShopKart Custom Vanilla CSS -->
+  <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+  <!-- ================= TOP HEADER (FLIPKART BLUE) ================= -->
+  <header class="site-header">
+    <div class="container nav-container">
+      
+      <!-- Logo -->
+      <a href="{% url 'product_list' %}" class="brand-logo" id="brand-logo-link">
+        <span class="brand-text">Shop<span>Kart</span></span>
+        <span class="brand-tagline">
+          Explore <span>Plus</span> <span class="star-icon">&#9733;</span>
+        </span>
+      </a>
+
+      <!-- Search Bar -->
+      <div class="search-wrapper">
+        <form action="{% url 'product_list' %}" method="GET" class="search-form" id="search-form">
+          <input 
+            type="text" 
+            name="q" 
+            id="nav-search-input" 
+            class="search-input" 
+            placeholder="Search for Indian products, brands and more..." 
+            value="{{ search_query|default:'' }}"
+            autocomplete="off"
+          >
+          {% if selected_category_slug %}
+            <input type="hidden" name="category" value="{{ selected_category_slug }}">
+          {% endif %}
+          <button type="submit" class="search-submit-btn" aria-label="Search" id="nav-search-btn">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+          </button>
+        </form>
+      </div>
+
+      <!-- Navigation Actions -->
+      <div class="nav-actions">
+        
+        <!-- Admin Dashboard Link -->
+        {% if is_admin_user %}
+          <a href="{% url 'admin_dashboard' %}" class="nav-link-white" id="nav-admin-dashboard" title="Admin Analytics">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+            </svg>
+            <span>Dashboard</span>
+          </a>
+        {% endif %}
+
+        <!-- User Authentication -->
+        {% if user.is_authenticated %}
+          <div class="user-menu-wrapper">
+            <button type="button" class="user-profile-btn" id="user-menu-btn" aria-label="My Account">
+              <span>{{ user.first_name|default:user.username }}</span>
+              <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </button>
+            <div class="user-dropdown-menu" id="user-dropdown">
+              <div class="user-dropdown-header">
+                <div class="dropdown-user-name">{{ user.get_full_name|default:user.username }}</div>
+                <div class="dropdown-user-email">{{ user.email }}</div>
+              </div>
+              <a href="{% url 'my_orders' %}" class="dropdown-item-link" id="menu-my-orders">
+                <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                </svg>
+                <span>Orders</span>
+              </a>
+              {% if is_admin_user %}
+                <a href="{% url 'admin_dashboard' %}" class="dropdown-item-link" id="menu-admin-dash">
+                  <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
+                  </svg>
+                  <span>Seller Hub</span>
+                </a>
+                <a href="/admin/" target="_blank" class="dropdown-item-link" id="menu-django-admin">
+                  <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                  </svg>
+                  <span>Django Admin</span>
+                </a>
+              {% endif %}
+              <div class="dropdown-divider-line"></div>
+              <a href="{% url 'logout' %}" class="dropdown-item-link logout-text" id="menu-logout">
+                <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                </svg>
+                <span>Logout</span>
+              </a>
+            </div>
+          </div>
+        {% else %}
+          <a href="{% url 'login' %}" class="btn-header-login" id="nav-login-btn">Login</a>
+        {% endif %}
+
+        <!-- Cart Button -->
+        <a href="{% url 'cart_view' %}" class="header-cart-link" id="nav-cart-btn" aria-label="Cart">
+          <div class="cart-icon-wrap">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.3" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+            </svg>
+            <span class="cart-badge-count" id="header-cart-badge">{{ cart_item_count }}</span>
+          </div>
+          <span>Cart</span>
+        </a>
+
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ================= CATEGORY NAVIGATION STRIP ================= -->
+  <nav class="category-strip">
+    <div class="container category-strip-inner">
+      <a href="{% url 'product_list' %}" class="cat-nav-link {% if not selected_category_slug %}active{% endif %}">
+        <span>All Categories</span>
+      </a>
+      {% for cat in all_categories %}
+        <a href="{% url 'product_list' %}?category={{ cat.slug }}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}" 
+           class="cat-nav-link {% if selected_category_slug == cat.slug or selected_category.slug == cat.slug %}active{% endif %}">
+          <span>{{ cat.name }}</span>
+        </a>
+      {% endfor %}
+    </div>
+  </nav>
+
+  <!-- ================= MAIN CONTENT ================= -->
+  <main class="main-content">
+    <div class="container">
+      
+      <!-- Messages / Toasts -->
+      {% if messages %}
+        <div class="messages-container" id="django-messages">
+          {% for message in messages %}
+            <div class="alert alert-{{ message.tags|default:'info' }}" role="alert">
+              <span>{{ message }}</span>
+              <button type="button" class="alert-close" aria-label="Dismiss">&times;</button>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      {% block content %}{% endblock %}
+
+    </div>
+  </main>
+
+  <!-- ================= FOOTER ================= -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-columns-grid">
+        <div class="footer-col">
+          <h4>ABOUT SHOPKART INDIA</h4>
+          <p style="font-size: 0.8rem; line-height: 1.6; margin-bottom: 0.75rem;">
+            ShopKart India is your one-stop online shopping destination for authentic electronics, traditional fashion, daily kitchen essentials, Ayurvedic beauty, books, and groceries with fast, pan-India delivery.
+          </p>
+          <div style="font-size: 0.75rem; color: #a0a0a0;">
+            100% Original Products &bull; Secure Payments &bull; Fast Delivery
+          </div>
+        </div>
+        <div class="footer-col">
+          <h4>TOP CATEGORIES</h4>
+          <ul>
+            {% for cat in all_categories|slice:":5" %}
+              <li><a href="{% url 'product_list' %}?category={{ cat.slug }}">{{ cat.name }}</a></li>
+            {% endfor %}
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>CUSTOMER SERVICE</h4>
+          <ul>
+            <li><a href="{% url 'my_orders' %}">Track Orders</a></li>
+            <li><a href="{% url 'cart_view' %}">Shopping Cart</a></li>
+            <li><a href="#">Shipping Policy</a></li>
+            <li><a href="#">Cancellation &amp; Returns</a></li>
+            <li><a href="{% url 'admin_dashboard' %}">Seller Hub</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>PAYMENT METHODS</h4>
+          <p style="font-size: 0.8rem; line-height: 1.5; color: #fff; margin-bottom: 0.5rem;">
+            &bull; UPI (GPay, PhonePe, Paytm)<br>
+            &bull; Cash on Delivery (COD)<br>
+            &bull; Net Banking &amp; Cards
+          </p>
+          <div style="background: #232f3e; padding: 0.5rem; border-radius: 4px; font-size: 0.75rem; color: #ffe8b3;">
+            Free Delivery on orders above &#8377;999
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom-bar">
+        <div>&copy; {% now "Y" %} ShopKart India Online Shopping. All Rights Reserved.</div>
+        <div style="font-size: 0.75rem; color: #a0a0a0;">
+          CodeAlpha Full Stack Development Project Submission &bull; Built with Django &amp; SQLite
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Vanilla JS -->
+  <script src="{% static 'js/main.js' %}"></script>
+  <script src="{% static 'js/cart.js' %}"></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,177 @@
+{% extends 'base.html' %}
+{% load currency_tags %}
+
+{% block title %}Checkout - ShopKart India{% endblock %}
+
+{% block content %}
+
+<div style="margin-bottom: 1.5rem;">
+  <h1 style="font-size: 1.5rem; font-weight: 700;">Secure Order Checkout</h1>
+  <p style="font-size: 0.85rem; color: var(--text-muted);">Please provide your Indian delivery address and select a payment method.</p>
+</div>
+
+<form action="{% url 'checkout' %}" method="POST" id="checkout-form">
+  {% csrf_token %}
+
+  <div class="checkout-layout-grid">
+    
+    <!-- Left Column: Delivery Address & Payment Method -->
+    <div>
+      
+      <!-- Step 1: Delivery Address -->
+      <div class="checkout-card-section">
+        <div class="checkout-step-header">
+          <span class="checkout-step-badge">1</span>
+          <h2 style="font-size: 1.15rem; font-weight: 700; color: var(--text-dark);">Delivery Address</h2>
+        </div>
+
+        <div class="form-grid-2">
+          
+          <div class="form-group-item">
+            <label for="{{ form.full_name.id_for_label }}" class="form-field-label">Full Name *</label>
+            {{ form.full_name }}
+            {% if form.full_name.errors %}
+              <div class="form-error-msg">{{ form.full_name.errors.0 }}</div>
+            {% endif %}
+          </div>
+
+          <div class="form-group-item">
+            <label for="{{ form.mobile.id_for_label }}" class="form-field-label">10-Digit Mobile Number *</label>
+            {{ form.mobile }}
+            {% if form.mobile.errors %}
+              <div class="form-error-msg">{{ form.mobile.errors.0 }}</div>
+            {% endif %}
+          </div>
+
+          <div class="form-group-item col-full">
+            <label for="{{ form.address.id_for_label }}" class="form-field-label">Flat, House No., Building, Street / Area *</label>
+            {{ form.address }}
+            {% if form.address.errors %}
+              <div class="form-error-msg">{{ form.address.errors.0 }}</div>
+            {% endif %}
+          </div>
+
+          <div class="form-group-item">
+            <label for="{{ form.city.id_for_label }}" class="form-field-label">City / District / Town *</label>
+            {{ form.city }}
+            {% if form.city.errors %}
+              <div class="form-error-msg">{{ form.city.errors.0 }}</div>
+            {% endif %}
+          </div>
+
+          <div class="form-group-item">
+            <label for="{{ form.state.id_for_label }}" class="form-field-label">State / Union Territory *</label>
+            {{ form.state }}
+            {% if form.state.errors %}
+              <div class="form-error-msg">{{ form.state.errors.0 }}</div>
+            {% endif %}
+          </div>
+
+          <div class="form-group-item">
+            <label for="{{ form.pin_code.id_for_label }}" class="form-field-label">6-Digit Indian PIN Code *</label>
+            {{ form.pin_code }}
+            {% if form.pin_code.errors %}
+              <div class="form-error-msg">{{ form.pin_code.errors.0 }}</div>
+            {% endif %}
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Step 2: Payment Option (Mock Payment) -->
+      <div class="checkout-card-section">
+        <div class="checkout-step-header">
+          <span class="checkout-step-badge">2</span>
+          <h2 style="font-size: 1.15rem; font-weight: 700; color: var(--text-dark);">Payment Options</h2>
+        </div>
+
+        <!-- COD Option -->
+        <label class="payment-option-card">
+          <input type="radio" name="payment_method" value="Cash on Delivery" checked style="accent-color: var(--primary-blue); width: 18px; height: 18px;">
+          <div style="flex: 1;">
+            <div style="font-weight: 700; color: var(--text-dark); font-size: 0.925rem;">Cash on Delivery (COD)</div>
+            <div style="font-size: 0.775rem; color: var(--text-muted);">Pay securely in cash or UPI QR upon delivery at your doorstep.</div>
+          </div>
+          <span style="font-size: 0.75rem; font-weight: 700; color: var(--success-green); background: var(--success-light); padding: 2px 6px; border-radius: 2px;">
+            Verified
+          </span>
+        </label>
+
+        <!-- UPI Option -->
+        <label class="payment-option-card">
+          <input type="radio" name="payment_method" value="UPI" style="accent-color: var(--primary-blue); width: 18px; height: 18px;">
+          <div style="flex: 1;">
+            <div style="font-weight: 700; color: var(--text-dark); font-size: 0.925rem;">UPI (GPay / PhonePe / Paytm / BHIM)</div>
+            <div style="font-size: 0.775rem; color: var(--text-muted);">Instant simulated digital sandbox payment.</div>
+          </div>
+          <span style="font-size: 0.75rem; font-weight: 700; color: var(--primary-blue); background: var(--primary-light); padding: 2px 6px; border-radius: 2px;">
+            Fast UPI
+          </span>
+        </label>
+
+      </div>
+
+    </div>
+
+    <!-- Right Column: Order Summary Sidebar -->
+    <div class="price-details-card">
+      <div class="price-details-header">
+        ORDER SUMMARY ({{ cart|length }} Item{{ cart|length|pluralize }})
+      </div>
+
+      <div class="price-details-body">
+        
+        <!-- Cart Items Preview -->
+        <div style="max-height: 240px; overflow-y: auto; margin-bottom: 1rem; border-bottom: 1px solid #f0f0f0; padding-bottom: 0.5rem;">
+          {% for item in cart %}
+            <div style="display: flex; gap: 0.75rem; align-items: center; margin-bottom: 0.6rem;">
+              <img src="{{ item.image }}" alt="{{ item.name }}" style="width: 44px; height: 44px; object-fit: cover; border-radius: 3px; border: 1px solid #f0f0f0;" onerror="this.onerror=null; this.src='/static/images/placeholder.svg';">
+              <div style="flex: 1; min-width: 0;">
+                <div style="font-size: 0.85rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ item.name }}</div>
+                <div style="font-size: 0.75rem; color: var(--text-muted);">Qty: {{ item.quantity }} &bull; {{ item.price|rupee }}</div>
+              </div>
+              <div style="font-size: 0.85rem; font-weight: 700;">{{ item.subtotal|rupee }}</div>
+            </div>
+          {% endfor %}
+        </div>
+
+        <div class="price-line-item">
+          <span>Items Subtotal</span>
+          <span>{{ cart.subtotal|rupee }}</span>
+        </div>
+
+        <div class="price-line-item">
+          <span>Delivery Charge</span>
+          {% if cart.delivery_charge == 0 %}
+            <span class="free-delivery-text">FREE</span>
+          {% else %}
+            <span>{{ cart.delivery_charge|rupee }}</span>
+          {% endif %}
+        </div>
+
+        <div class="price-line-item">
+          <span>GST (18% Included)</span>
+          <span style="color: var(--text-sub);">{{ cart.gst_amount|rupee }}</span>
+        </div>
+
+        <div class="price-line-item total-line">
+          <span>Amount Payable</span>
+          <span style="color: var(--text-dark); font-family: var(--font-heading);">{{ cart.total_amount|rupee }}</span>
+        </div>
+
+        <button type="submit" class="btn btn-buy-now btn-block btn-lg" style="margin-top: 1.25rem; font-size: 1rem;" id="confirm-place-order-btn">
+          CONFIRM &amp; PLACE ORDER
+        </button>
+
+        <div style="text-align: center; margin-top: 0.75rem;">
+          <a href="{% url 'cart_view' %}" style="font-size: 0.8rem; color: var(--text-muted);">&larr; Return to Shopping Cart</a>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+</form>
+
+{% endblock %}

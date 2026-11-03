@@ -1,0 +1,262 @@
+{% extends 'base.html' %}
+{% load currency_tags %}
+
+{% block title %}{{ product.name }} - ShopKart India{% endblock %}
+{% block meta_description %}{{ product.description|truncatewords:25 }}{% endblock %}
+
+{% block content %}
+
+<!-- Breadcrumbs -->
+<div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.4rem;">
+  <a href="{% url 'product_list' %}" style="color: var(--text-muted);">Home</a>
+  <span>&rsaquo;</span>
+  <a href="{% url 'product_list' %}?category={{ product.category.slug }}" style="color: var(--text-muted);">{{ product.category.name }}</a>
+  <span>&rsaquo;</span>
+  <span style="color: var(--text-dark); font-weight: 600;">{{ product.name|truncatechars:45 }}</span>
+</div>
+
+<!-- Main Product Details Container -->
+<div class="detail-card-container">
+  <div class="detail-layout-grid">
+    
+    <!-- Left Column: Gallery & Action Buttons (Flipkart Sticky) -->
+    <div class="detail-gallery-sticky">
+      <div class="detail-image-box">
+        <img 
+          src="{{ product.image_url }}" 
+          alt="{{ product.name }}" 
+          class="detail-main-img" 
+          id="main-product-img"
+          onerror="this.onerror=null; this.src='/static/images/placeholder.svg';"
+        >
+      </div>
+
+      <!-- Action Buttons: Add to Cart (Yellow) & Buy Now (Orange) -->
+      <div class="detail-btn-group">
+        
+        <!-- Add to Cart Form -->
+        <form action="{% url 'cart_add' product.id %}" method="POST" class="ajax-add-cart-form" style="margin: 0;">
+          {% csrf_token %}
+          <input type="hidden" name="quantity" id="hidden-cart-qty" value="1">
+          <button 
+            type="submit" 
+            class="btn btn-add-cart btn-block btn-lg" 
+            id="detail-add-cart-btn"
+            {% if product.stock <= 0 %}disabled{% endif %}
+          >
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+            {% if product.stock <= 0 %}OUT OF STOCK{% else %}ADD TO CART{% endif %}
+          </button>
+        </form>
+
+        <!-- Buy Now Form (Fast-track to Checkout) -->
+        <form action="{% url 'buy_now' product.id %}" method="POST" style="margin: 0;">
+          {% csrf_token %}
+          <input type="hidden" name="quantity" id="hidden-buy-qty" value="1">
+          <button 
+            type="submit" 
+            class="btn btn-buy-now btn-block btn-lg" 
+            id="detail-buy-now-btn"
+            {% if product.stock <= 0 %}disabled{% endif %}
+          >
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            BUY NOW
+          </button>
+        </form>
+
+      </div>
+    </div>
+
+    <!-- Right Column: Product Specifications & Offers -->
+    <div class="detail-product-info">
+      
+      <span style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.35rem;">
+        {{ product.category.name }}
+      </span>
+
+      <h1 class="detail-title">{{ product.name }}</h1>
+
+      <!-- Ratings & Reviews -->
+      <div class="detail-rating-row">
+        <span class="rating-pill">
+          {{ product.rating }} <span class="rating-star-icon">&#9733;</span>
+        </span>
+        <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted);">
+          1,428 Ratings &bull; 216 Reviews
+        </span>
+        <span style="font-size: 0.85rem; color: var(--success-green); font-weight: 700;">
+          ShopKart Assured &#10003;
+        </span>
+      </div>
+
+      <!-- Price Box in INR -->
+      <div class="detail-price-panel">
+        <div class="price-row" style="align-items: center; gap: 0.75rem; margin-bottom: 0.25rem;">
+          <span class="detail-selling-price">{{ product.selling_price|rupee }}</span>
+          <span class="detail-mrp">{{ product.mrp|rupee }}</span>
+          {% if product.discount_percent > 0 %}
+            <span class="detail-discount">{{ product.discount_percent }}% off</span>
+          {% endif %}
+        </div>
+        <div style="font-size: 0.85rem; color: var(--success-green); font-weight: 700;">
+          You save {{ product.savings|rupee }} (Inclusive of all applicable Indian taxes)
+        </div>
+        <div>
+          <span class="special-price-badge">&#9733; Special Indian Festive Price</span>
+        </div>
+      </div>
+
+      <!-- Bank & Partner Offers (Indian E-commerce Style) -->
+      <div class="offers-box">
+        <h4>
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+          Available Offers
+        </h4>
+        <div class="offer-bullet">
+          <span class="offer-tag">Bank Offer:</span> 5% Unlimited Cashback on Flipkart / Axis Bank Credit Cards.
+        </div>
+        <div class="offer-bullet">
+          <span class="offer-tag">Special Price:</span> Get extra &#8377;150 off on UPI transactions above &#8377;1,499.
+        </div>
+        <div class="offer-bullet">
+          <span class="offer-tag">Delivery:</span> <strong>FREE Delivery</strong> on orders above &#8377;999.
+        </div>
+      </div>
+
+      <!-- Stock Meter & Quantity Stepper -->
+      <div style="display: flex; align-items: center; gap: 1.5rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
+        <div>
+          <span style="font-size: 0.85rem; font-weight: 700; color: var(--text-sub); display: block; margin-bottom: 0.35rem;">
+            Quantity:
+          </span>
+          <div class="quantity-stepper">
+            <button type="button" class="stepper-btn btn-dec" aria-label="Decrease quantity" {% if product.stock <= 0 %}disabled{% endif %}>-</button>
+            <input 
+              type="number" 
+              id="detail-qty-input" 
+              class="stepper-input" 
+              value="1" 
+              min="1" 
+              max="{{ product.stock }}"
+              {% if product.stock <= 0 %}disabled{% endif %}
+            >
+            <button type="button" class="stepper-btn btn-inc" aria-label="Increase quantity" {% if product.stock <= 0 %}disabled{% endif %}>+</button>
+          </div>
+        </div>
+
+        <div>
+          <span style="font-size: 0.85rem; font-weight: 700; color: var(--text-sub); display: block; margin-bottom: 0.35rem;">
+            Inventory Status:
+          </span>
+          {% if product.stock <= 0 %}
+            <span style="color: var(--danger-red); font-weight: 700; font-size: 0.95rem;">
+              &#10007; Currently Out of Stock
+            </span>
+          {% elif product.stock <= 5 %}
+            <span style="color: var(--warning-amber); font-weight: 700; font-size: 0.95rem;">
+              &#9888; Only {{ product.stock }} unit{{ product.stock|pluralize }} left in stock!
+            </span>
+          {% else %}
+            <span style="color: var(--success-green); font-weight: 700; font-size: 0.95rem;">
+              &#10003; In Stock ({{ product.stock }} units ready to dispatch)
+            </span>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Description & Specs -->
+      <div style="border-top: 1px solid #f0f0f0; padding-top: 1.25rem; margin-top: 0.5rem;">
+        <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 0.6rem;">Product Description</h3>
+        <p style="font-size: 0.9rem; line-height: 1.7; color: var(--text-sub); white-space: pre-line;">
+          {{ product.description }}
+        </p>
+      </div>
+
+      <!-- Indian E-Commerce Trust Badges -->
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; border-top: 1px solid #f0f0f0; padding-top: 1.25rem; margin-top: 1.5rem; text-align: center;">
+        <div style="padding: 0.5rem; background: #fafafa; border-radius: 4px;">
+          <div style="font-weight: 700; font-size: 0.8rem; color: var(--text-dark);">7 Days Replacement</div>
+          <div style="font-size: 0.75rem; color: var(--text-muted);">Brand Warranty Support</div>
+        </div>
+        <div style="padding: 0.5rem; background: #fafafa; border-radius: 4px;">
+          <div style="font-weight: 700; font-size: 0.8rem; color: var(--text-dark);">Free Delivery</div>
+          <div style="font-size: 0.75rem; color: var(--text-muted);">Orders over &#8377;999</div>
+        </div>
+        <div style="padding: 0.5rem; background: #fafafa; border-radius: 4px;">
+          <div style="font-weight: 700; font-size: 0.8rem; color: var(--text-dark);">Cash on Delivery</div>
+          <div style="font-size: 0.75rem; color: var(--text-muted);">Pay upon arrival</div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<!-- Related Products in Category -->
+{% if related_products %}
+  <div style="background: #fff; padding: 1.5rem; border-radius: 4px; box-shadow: var(--shadow-card);">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; padding-bottom: 0.75rem; border-bottom: 1px solid #f0f0f0;">
+      <h2 style="font-size: 1.2rem; font-weight: 700;">Similar Products in {{ product.category.name }}</h2>
+      <a href="{% url 'product_list' %}?category={{ product.category.slug }}" style="font-size: 0.85rem; font-weight: 700; color: var(--primary-blue);">
+        VIEW ALL &rarr;
+      </a>
+    </div>
+
+    <div class="product-grid">
+      {% for rel in related_products %}
+        <div class="product-card">
+          <div class="card-image-box">
+            <a href="{{ rel.get_absolute_url }}">
+              <img src="{{ rel.image_url }}" alt="{{ rel.name }}" class="card-img" onerror="this.onerror=null; this.src='/static/images/placeholder.svg';">
+            </a>
+            <span class="card-badge-category">{{ rel.category.name }}</span>
+          </div>
+          <div class="card-body">
+            <div>
+              <span class="rating-pill">{{ rel.rating }} &#9733;</span>
+            </div>
+            <h4 class="card-product-title">
+              <a href="{{ rel.get_absolute_url }}">{{ rel.name }}</a>
+            </h4>
+            <div class="price-row">
+              <span class="selling-price">{{ rel.selling_price|rupee }}</span>
+              <span class="mrp-price">{{ rel.mrp|rupee }}</span>
+              <span class="discount-tag">{{ rel.discount_percent }}% off</span>
+            </div>
+            <a href="{{ rel.get_absolute_url }}" class="btn btn-secondary btn-sm btn-block" style="margin-top: auto;">
+              View Details
+            </a>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+{% endif %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Sync quantity stepper with Add to Cart and Buy Now hidden fields
+  const qtyInput = document.getElementById('detail-qty-input');
+  const hiddenCartQty = document.getElementById('hidden-cart-qty');
+  const hiddenBuyQty = document.getElementById('hidden-buy-qty');
+
+  function syncQty() {
+    if (qtyInput) {
+      if (hiddenCartQty) hiddenCartQty.value = qtyInput.value;
+      if (hiddenBuyQty) hiddenBuyQty.value = qtyInput.value;
+    }
+  }
+
+  if (qtyInput) {
+    qtyInput.addEventListener('change', syncQty);
+    qtyInput.addEventListener('input', syncQty);
+  }
+
+  document.querySelectorAll('form').forEach(form => {
+    form.addEventListener('submit', syncQty);
+  });
+</script>
+{% endblock %}
